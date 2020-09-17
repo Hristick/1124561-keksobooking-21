@@ -1,7 +1,7 @@
 # Личный проект «Кексобукинг» [![Build status][travis-image]][travis-url]
 
 * Студент: [Владимир Христофоров](https://up.htmlacademy.ru/javascript/21/user/1124561).
-* Наставник: `Неизвестно`.
+* Наставник: [Юлия Корецкая](https://github.com/yulllll).
 
 ---
 
