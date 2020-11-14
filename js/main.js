@@ -1,7 +1,8 @@
 'use strict';
 
 const countOfOffer = 8;
-const avatarData = ['img/avatars/user01.png', 'img/avatars/user02.png', 'img/avatars/user03.png', 'img/avatars/user04.png', 'img/avatars/user05.png', 'img/avatars/user06.png', 'img/avatars/user07.png', 'img/avatars/user08.png'];
+
+const avatarData = [`img/avatars/user01.png`, `img/avatars/user02.png`, `img/avatars/user03.png`, 'img/avatars/user04.png', 'img/avatars/user05.png', 'img/avatars/user06.png', 'img/avatars/user07.png', 'img/avatars/user08.png'];
 const titleData = ['Однушка в Бутово', 'Сарай на Черемушках', 'Гамак под зонтиком', 'Палатка с удобствами', 'Пентхаус', 'Частный домик'];
 const adressData = ['300, 500'];
 const priceHousing = ['880', '3320', '1800', '4240', '9800', '34500'];
@@ -15,77 +16,91 @@ const descriptionData = ['Превосходное жилье', 'Чудесна�
 const photosLink = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.github.io/assets/images/tokyo/hotel2.jpg', 'http://o0.github.io/assets/images/tokyo/hotel3.jpg'];
 const map = document.querySelector('.map');
 const mapPins = document.querySelector('.map__pins');
-
-
-
-const getRandomValue = (array) => {
-  const random = Math.floor(Math.random() * array.length);
-  return array[random];
-};
-
-const getRandomNumbers = (min, max) => {
-  const rand = min - 0.5 + Math.random() * (max - min + 1);
-  return Math.round(rand);
-};
+const mapPinMain = document.querySelector('.map__pin--main');
+const mocksPin = document.querySelector('#pin').content.querySelector('.map__pin');
+const addForm = document.querySelector('.ad-form');
+const pinCordinate = document.querySelector('#address');
+const addFormElem = addForm.querySelectorAll('.ad-form__element');
+const mapFilters = map.querySelectorAll('.map__filter');
+const pointerHeigth = 22;
+const roomsNumberCount = addForm.querySelector('#room_number');
+const guestCountFormValue = addForm.querySelector('#capacity');
 //Функция генерации предложения
-const getOfferMock =  function (titleData, adressData, priceHousing, typeOfHousing,
-  roomsCount, guestsCount, checkInTime, checkOutTime, featuresData, descriptionData, photosLink) {
-    const mockOfferArray = [];
-    for (let i = 0; i < countOfOffer; i++) {
-      mockOfferArray.push({
-        title: getRandomValue(titleData),
-        address: getRandomValue(adressData),
-        price: getRandomValue(priceHousing),
-        type: getRandomValue(typeOfHousing),
-        rooms: getRandomValue(roomsCount),
-        guests: getRandomValue(guestsCount),
-        checkIn: getRandomValue(checkInTime),
-        checkOut: getRandomValue(checkOutTime),
-        features: getRandomValue(featuresData),
-        description: getRandomValue(descriptionData),
-        photos: getRandomValue(photosLink)
-      });
-    }
-    return mockOfferArray;
+
+
+const mockOfferData = window.mocks.getOffer(titleData, adressData, priceHousing, typeOfHousing,
+  roomsCount, guestsCount, checkInTime, checkOutTime, featuresData, descriptionData, photosLink);
+
+  const mocksData = window.mocks.getData(mockOfferData);
+
+// Задание 4
+/**
+ * @param formElements {HTMLElememt[]}
+ * @param isDisabled {boolean}
+ */
+function setFormDisabled(formElements, isDisabled) {
+  formElements.forEach(element => {
+    element.disabled = isDisabled;
+  });
+}
+
+const deactivateForms = function (){
+  addForm.classList.add('ad-form--disabled');
+  setFormDisabled(addFormElem, true);
+  setFormDisabled(mapFilters, true);
+}
+deactivateForms();
+
+const activateForms = function activateForms(){
+  addForm.classList.remove('ad-form--disabled');
+  setFormDisabled(addFormElem, false);
+  setFormDisabled(mapFilters, false);
+  map.classList.remove('map--faded');
+  mapPins.appendChild(renderPins());
+}
+
+const mapPin = document.querySelector('.map__pin');
+
+const getMapPinUnactiveCordinate = function () {
+  const x = +(mapPin.style.left.replace(/px/g, '')) + +(Math.round(mapPin.clientWidth / 2));
+  const y = +(mapPin.style.top.replace(/px/g, '')) + +(Math.round(mapPin.clientHeight / 2));;
+  pinCordinate.value = (x + ', ' + y);
+}
+getMapPinUnactiveCordinate();
+
+const getMapPinActiveCordinate = function () {
+  const x = +(mapPin.style.left.replace(/px/g, '')) + +(Math.round(mapPin.clientWidth / 2));
+  const y = +(mapPin.style.top.replace(/px/g, '')) + +(Math.round(mapPin.clientHeight) + pointerHeigth);
+  pinCordinate.value = (x + ', ' + y);
+}
+
+
+
+const isFormValidityGuestCount = function () {
+  const guestValue = guestCountFormValue.value;
+  const roomsValue = roomsNumberCount.value;
+  if (roomsValue < guestValue) {
+    roomsNumberCount.setCustomValidity('Вас слишком много выберите номер побольше!');
   }
+  else {roomsNumberCount.setCustomValidity(``);}
+  guestCountFormValue.reportValidity();
+}
+roomsNumberCount.addEventListener(`change`, isFormValidityGuestCount);
+guestCountFormValue.addEventListener(`change`, isFormValidityGuestCount);
 
-  const mockOfferData = getOfferMock(titleData, adressData, priceHousing, typeOfHousing,
-    roomsCount, guestsCount, checkInTime, checkOutTime, featuresData, descriptionData, photosLink);
 
-    // Функция генерации массива с моками
-  const getMockData = function(mockOfferData) {
-    const mocks = [];
-    for (let i = 0; i <countOfOffer; i++) {
-        const author = {
-          avatar: getRandomValue(avatarData)
-        };
-        const offer = mockOfferData[i];
-        const location = {
-          x: getRandomNumbers(0, map.clientWidth),
-          y: getRandomNumbers(130, 630)}
-        mocks.push({author, offer, location})
-    }
-    return mocks;
+const onMainPinKeyPress = function (evt) {
+  if(evt.which === 13){
+    activateForms();
+    getMapPinActiveCordinate();
   }
-  const mocksData =  getMockData(mockOfferData);
-
-  document.querySelector('.map').classList.remove('map--faded');
-  const mocksPin = document.querySelector('#pin').content.querySelector(`.map__pin`);
-
-
-  const renderPins = function() {
-    const fragment = document.createDocumentFragment();
-      for (let i = 0; i < countOfOffer; i++) {
-        let pinElement = mocksPin.cloneNode(true);
-        const img = mocksPin.querySelector('img');
-        img.src = mocksData[i].author.avatar;
-        img.alt = mocksData[i].offer.title;
-        pinElement.style = `left: ${mocksData[i].location.x - img.width / 2}px;
-                            top: ${mocksData[i].location.y - img.height}px;}`;
-        fragment.append(pinElement);
-      }
-      return fragment;
+}
+const onMainPinMouseDown = function (evt) {
+  if(evt.button === 0){
+    activateForms();
+    getMapPinActiveCordinate();
   }
+}
 
-
-mapPins.appendChild(renderPins());
+  mapPinMain.addEventListener('keydown', onMainPinKeyPress);
+  mapPinMain.addEventListener('mousedown', onMainPinMouseDown);
