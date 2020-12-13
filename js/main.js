@@ -22,9 +22,13 @@ const addForm = document.querySelector('.ad-form');
 const pinCordinate = document.querySelector('#address');
 const addFormElem = addForm.querySelectorAll('.ad-form__element');
 const mapFilters = map.querySelectorAll('.map__filter');
-const pointerHeigth = 22;
+const POINTER_HEIGTH = 22;
 const roomsNumberCount = addForm.querySelector('#room_number');
 const guestCountFormValue = addForm.querySelector('#capacity');
+const typeOfRent = addForm.querySelector('#type');
+const priceRent = addForm.querySelector('#price');
+const timeIn = addForm.querySelector('#price');
+
 //Функция генерации предложения
 
 
@@ -62,15 +66,15 @@ const activateForms = function activateForms(){
 const mapPin = document.querySelector('.map__pin');
 
 const getMapPinUnactiveCordinate = function () {
-  const x = +(mapPin.style.left.replace(/px/g, '')) + +(Math.round(mapPin.clientWidth / 2));
-  const y = +(mapPin.style.top.replace(/px/g, '')) + +(Math.round(mapPin.clientHeight / 2));;
+  const x = +(mapPin.style.left.replace(/px/g, '')) + (Math.round(mapPin.clientWidth / 2));
+  const y = +(mapPin.style.top.replace(/px/g, '')) + (Math.round(mapPin.clientHeight / 2));;
   pinCordinate.value = (x + ', ' + y);
 }
 getMapPinUnactiveCordinate();
 
 const getMapPinActiveCordinate = function () {
-  const x = +(mapPin.style.left.replace(/px/g, '')) + +(Math.round(mapPin.clientWidth / 2));
-  const y = +(mapPin.style.top.replace(/px/g, '')) + +(Math.round(mapPin.clientHeight) + pointerHeigth);
+  const x = +(mapPin.style.left.replace(/px/g, '')) + (Math.round(mapPin.clientWidth / 2));
+  const y = +(mapPin.style.top.replace(/px/g, '')) + (Math.round(mapPin.clientHeight) + POINTER_HEIGTH);
   pinCordinate.value = (x + ', ' + y);
 }
 
@@ -79,15 +83,50 @@ const getMapPinActiveCordinate = function () {
 const isFormValidityGuestCount = function () {
   const guestValue = guestCountFormValue.value;
   const roomsValue = roomsNumberCount.value;
-  if (roomsValue < guestValue) {
+  if (roomsValue === `100`)  {
+    roomsNumberCount.setCustomValidity('Данная категория не для гостей!');
+    guestCountFormValue.value = 0;
+  } else if (roomsValue < guestValue) {
     roomsNumberCount.setCustomValidity('Вас слишком много выберите номер побольше!');
-  }
-  else {roomsNumberCount.setCustomValidity(``);}
+  }   else  {roomsNumberCount.setCustomValidity(``);}
+
   guestCountFormValue.reportValidity();
 }
+
+
 roomsNumberCount.addEventListener(`change`, isFormValidityGuestCount);
 guestCountFormValue.addEventListener(`change`, isFormValidityGuestCount);
 
+
+
+
+
+const isFormValidityTypeAndPrice = function () {
+  switch (typeOfRent.value) {
+  case `bungalow`:
+    priceRent.min = 0;
+    priceRent.placeholder = 0;
+    break;
+  case `flat`:
+    priceRent.min = 1000;
+    priceRent.placeholder = 1000;
+    break;
+  case `house`:
+    priceRent.min = 5000;
+    priceRent.placeholder = 5000;
+    break;
+  case `palace`:
+    priceRent.min = 10000;
+    priceRent.placeholder = 10000;
+    break;
+}
+}
+typeOfRent.addEventListener(`change`, isFormValidityTypeAndPrice);
+
+
+const isFormValidityTimeIn = function () {
+
+}
 
 const onMainPinKeyPress = function (evt) {
   if(evt.which === 13){
